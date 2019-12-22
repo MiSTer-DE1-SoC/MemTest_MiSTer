@@ -1,5 +1,5 @@
 set_global_assignment -name FAMILY "Cyclone V"
-set_global_assignment -name DEVICE 5CSXFC6D6F31C6
+set_global_assignment -name DEVICE 5CSEMA5F31C6
 #set_global_assignment -name DEVICE_FILTER_PACKAGE UFBGA
 #set_global_assignment -name DEVICE_FILTER_PIN_COUNT 672
 #set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 7
@@ -57,57 +57,51 @@ set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to SDCD_SPDIF
 #============================================================
 # SDRAM
 #============================================================
-set_location_assignment PIN_AC9 -to SDRAM_A[0]
-set_location_assignment PIN_AC12 -to SDRAM_A[1]
-set_location_assignment PIN_AB12 -to SDRAM_A[2]
-set_location_assignment PIN_AA12 -to SDRAM_A[3]
-set_location_assignment PIN_AE11 -to SDRAM_A[4]
-set_location_assignment PIN_AF10 -to SDRAM_A[5]
-set_location_assignment PIN_AE7 -to SDRAM_A[6]
-set_location_assignment PIN_AF8 -to SDRAM_A[7]
-set_location_assignment PIN_AF9 -to SDRAM_A[8]
-set_location_assignment PIN_AF5 -to SDRAM_A[9]
-set_location_assignment PIN_AD12 -to SDRAM_A[10]
-set_location_assignment PIN_AF6 -to SDRAM_A[11]
-set_location_assignment PIN_AG8 -to SDRAM_A[12]
-set_location_assignment PIN_AD10 -to SDRAM_BA[0]
-set_location_assignment PIN_AD11 -to SDRAM_BA[1]
-set_location_assignment PIN_AK2 -to SDRAM_DQ[0]
-set_location_assignment PIN_W15 -to SDRAM_DQ[1]
-set_location_assignment PIN_AK3 -to SDRAM_DQ[2]
-set_location_assignment PIN_Y16 -to SDRAM_DQ[3]
-set_location_assignment PIN_AJ2 -to SDRAM_DQ[4]
-set_location_assignment PIN_AJ1 -to SDRAM_DQ[5]
-set_location_assignment PIN_AH3 -to SDRAM_DQ[6]
-set_location_assignment PIN_AH2 -to SDRAM_DQ[7]
-set_location_assignment PIN_AG7 -to SDRAM_DQ[8]
-set_location_assignment PIN_AG6 -to SDRAM_DQ[9]
-set_location_assignment PIN_AG5 -to SDRAM_DQ[10]
-set_location_assignment PIN_AG3 -to SDRAM_DQ[11]
-set_location_assignment PIN_AG2 -to SDRAM_DQ[12]
-set_location_assignment PIN_AG1 -to SDRAM_DQ[13]
-set_location_assignment PIN_AH4 -to SDRAM_DQ[14]
-set_location_assignment PIN_AH5 -to SDRAM_DQ[15]
-set_location_assignment -remove -to SDRAM_DQML
-set_location_assignment -remove -to SDRAM_DQMH
-#set_location_assignment PIN_AB13 -to SDRAM_DQML
-#set_location_assignment PIN_AK12 -to SDRAM_DQMH
-set_location_assignment PIN_AF4 -to SDRAM_CLK
-set_location_assignment -remove -to SDRAM_CKE
-#set_location_assignment PIN_AK13 -to SDRAM_CKE
-set_location_assignment PIN_AE9 -to SDRAM_nWE
-set_location_assignment PIN_AE12 -to SDRAM_nCAS
-set_location_assignment PIN_AD9 -to SDRAM_nCS
-set_location_assignment PIN_AD7 -to SDRAM_nRAS
+set_location_assignment PIN_AK14 -to SDRAM_A[0]
+set_location_assignment PIN_AH14 -to SDRAM_A[1]
+set_location_assignment PIN_AG15 -to SDRAM_A[2]
+set_location_assignment PIN_AE14 -to SDRAM_A[3]
+set_location_assignment PIN_AB15 -to SDRAM_A[4]
+set_location_assignment PIN_AC14 -to SDRAM_A[5]
+set_location_assignment PIN_AD14 -to SDRAM_A[6]
+set_location_assignment PIN_AF15 -to SDRAM_A[7]
+set_location_assignment PIN_AH15 -to SDRAM_A[8]
+set_location_assignment PIN_AG13 -to SDRAM_A[9]
+set_location_assignment PIN_AG12 -to SDRAM_A[10]
+set_location_assignment PIN_AH13 -to SDRAM_A[11]
+set_location_assignment PIN_AJ14 -to SDRAM_A[12]
+set_location_assignment PIN_AF13 -to SDRAM_BA[0]
+set_location_assignment PIN_AJ12 -to SDRAM_BA[1]
+set_location_assignment PIN_AK6 -to SDRAM_DQ[0]
+set_location_assignment PIN_AJ7 -to SDRAM_DQ[1]
+set_location_assignment PIN_AK7 -to SDRAM_DQ[2]
+set_location_assignment PIN_AK8 -to SDRAM_DQ[3]
+set_location_assignment PIN_AK9 -to SDRAM_DQ[4]
+set_location_assignment PIN_AG10 -to SDRAM_DQ[5]
+set_location_assignment PIN_AK11 -to SDRAM_DQ[6]
+set_location_assignment PIN_AJ11 -to SDRAM_DQ[7]
+set_location_assignment PIN_AH10 -to SDRAM_DQ[8]
+set_location_assignment PIN_AJ10 -to SDRAM_DQ[9]
+set_location_assignment PIN_AJ9 -to SDRAM_DQ[10]
+set_location_assignment PIN_AH9 -to SDRAM_DQ[11]
+set_location_assignment PIN_AH8 -to SDRAM_DQ[12]
+set_location_assignment PIN_AH7 -to SDRAM_DQ[13]
+set_location_assignment PIN_AJ6 -to SDRAM_DQ[14]
+set_location_assignment PIN_AJ5 -to SDRAM_DQ[15]
+set_location_assignment PIN_AB13 -to SDRAM_DQML
+set_location_assignment PIN_AK12 -to SDRAM_DQMH
+set_location_assignment PIN_AH12 -to SDRAM_CLK
+set_location_assignment PIN_AK13 -to SDRAM_CKE
+set_location_assignment PIN_AA13 -to SDRAM_nWE
+set_location_assignment PIN_AF11 -to SDRAM_nCAS
+set_location_assignment PIN_AG11 -to SDRAM_nCS
+set_location_assignment PIN_AE13 -to SDRAM_nRAS
 
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SDRAM_*
 set_instance_assignment -name CURRENT_STRENGTH_NEW "MAXIMUM CURRENT" -to SDRAM_*
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to SDRAM_A*
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to SDRAM_BA*
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to SDRAM_DQ[*]
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to SDRAM_DQM*
-set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to SDRAM_n*
+set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to SDRAM_*														  
 set_instance_assignment -name FAST_OUTPUT_ENABLE_REGISTER ON -to SDRAM_DQ[*]
+set_instance_assignment -name FAST_INPUT_REGISTER ON -to SDRAM_DQ[*]
 set_instance_assignment -name ALLOW_SYNCH_CTRL_USAGE OFF -to *|SDRAM_*
 
 #============================================================
@@ -211,8 +205,8 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to HDMI_TX_VS
 #============================================================
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[0]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to KEY[1]
-set_location_assignment PIN_Y27 -to KEY[0]
-set_location_assignment PIN_AB28 -to KEY[1]
+set_location_assignment PIN_AC12 -to KEY[0]
+set_location_assignment PIN_AF9 -to KEY[1]
 
 #============================================================
 # LED
@@ -225,7 +219,7 @@ set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[4]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[5]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[6]
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to LED[7]
-set_location_assignment PIN_AD24 -to LED[0]
+set_location_assignment PIN_V18 -to LED[0]
 #set_location_assignment PIN_AA24 -to LED[1]
 #set_location_assignment PIN_V16 -to LED[2]
 #set_location_assignment PIN_V15 -to LED[3]
@@ -248,7 +242,7 @@ set_location_assignment PIN_AB30 -to SW[0]
 
 set_instance_assignment -name HPS_LOCATION HPSINTERFACEPERIPHERALSPIMASTER_X52_Y72_N111 -entity sys_top -to spi
 set_instance_assignment -name HPS_LOCATION HPSINTERFACEPERIPHERALUART_X52_Y67_N111 -entity sys_top -to uart
-set_location_assignment FRACTIONALPLL_X89_Y1_N0 -to emu:emu|pll:pll|pll_0002:pll_inst|altera_pll:altera_pll_i|altera_cyclonev_pll:cyclonev_pll|altera_cyclonev_pll_base:fpll_0|fpll
+#set_location_assignment FRACTIONALPLL_X89_Y1_N0 -to emu:emu|pll:pll|pll_0002:pll_inst|altera_pll:altera_pll_i|altera_cyclonev_pll:cyclonev_pll|altera_cyclonev_pll_base:fpll_0|fpll
 
 set_global_assignment -name PRE_FLOW_SCRIPT_FILE "quartus_sh:sys/build_id.tcl"
 

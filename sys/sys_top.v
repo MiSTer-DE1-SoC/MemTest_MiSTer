@@ -23,13 +23,13 @@
 //
 //============================================================================
 
+
 module sys_top
 (
 	/////////// CLOCK //////////
 	input         FPGA_CLK1_50,
 	input         FPGA_CLK2_50,
 	input         FPGA_CLK3_50,
-	
 
 	//////////// HDMI //////////
 	output        HDMI_I2C_SCL,
@@ -73,8 +73,7 @@ module sys_top
 	output        SDRAM2_CLK,
 
 `else
-
-//////////// VGA ///////////
+	//////////// VGA ///////////
 	//DE10-nano board implementation contained 6 / color
 	//output  [5:0] VGA_R,
 	//output  [5:0] VGA_G,
@@ -156,11 +155,12 @@ module sys_top
 	inout   [6:0] USER_IO
 );
 
-//////////////////////  Secondary SD  ///////////////////////////////////
 
 // DE10-Stanard / DE1-SoC / Arrow SoCKit VGA mode
 assign SW[3] = 1'b0;		//necessary for VGA mode
 assign VGA_EN = 1'b0;		//enable VGA mode when VGA_EN is low
+
+//////////////////////  Secondary SD  ///////////////////////////////////
 
 wire sd_miso;
 wire SD_CS, SD_CLK, SD_MOSI, SD_MISO;
@@ -480,7 +480,7 @@ always @(posedge FPGA_CLK2_50) begin
 end
 
 wire clk_100m;
-wire clk_hdmi  = ~hdmi_clk_out;  // Internal HDMI clock, inverted in relation to external clock
+wire clk_hdmi  = hdmi_clk_out;
 wire clk_audio = FPGA_CLK3_50;
 wire clk_pal   = FPGA_CLK3_50;
 
@@ -873,7 +873,7 @@ osd hdmi_osd
 
 reg [23:0] dv_data;
 reg        dv_hs, dv_vs, dv_de;
-always @(negedge clk_vid) begin
+always @(posedge clk_vid) begin
 	reg [23:0] dv_d1, dv_d2;
 	reg        dv_de1, dv_de2, dv_hs1, dv_hs2, dv_vs1, dv_vs2;
 	reg [12:0] vsz, vcnt;
@@ -912,11 +912,64 @@ always @(negedge clk_vid) begin
 	dv_vs  <= dv_vs2;
 end
 
-assign HDMI_TX_CLK = direct_video ? clk_vid : hdmi_clk_out;
-assign HDMI_TX_HS  = direct_video ? dv_hs   : hdmi_hs_osd;
-assign HDMI_TX_VS  = direct_video ? dv_vs   : hdmi_vs_osd;
-assign HDMI_TX_DE  = direct_video ? dv_de   : hdmi_de_osd;
-assign HDMI_TX_D   = direct_video ? dv_data : hdmi_data_osd;
+wire hdmi_tx_clk;
+cyclonev_clkselect hdmi_clk_sw
+( 
+	.clkselect({1'b1, direct_video}),
+	.inclk({clk_vid, hdmi_clk_out, 2'b00}),
+	.outclk(hdmi_tx_clk)
+);
+
+altddio_out
+#(
+	.extend_oe_disable("OFF"),
+	.intended_device_family("Cyclone V"),
+	.invert_output("OFF"),
+	.lpm_hint("UNUSED"),
+	.lpm_type("altddio_out"),
+	.oe_reg("UNREGISTERED"),
+	.power_up_high("OFF"),
+	.width(1)
+)
+hdmiclk_ddr
+(
+	.datain_h(1'b0),
+	.datain_l(1'b1),
+	.outclock(hdmi_tx_clk),
+	//.dataout(HDMI_TX_CLK),
+	.dataout(VGA_CLK),
+	.aclr(1'b0),
+	.aset(1'b0),
+	.oe(1'b1),
+	.outclocken(1'b1),
+	.sclr(1'b0),
+	.sset(1'b0)
+);
+
+reg hdmi_out_hs;
+reg hdmi_out_vs;
+reg hdmi_out_de;
+reg [23:0] hdmi_out_d;
+
+always @(posedge hdmi_tx_clk) begin
+	reg hs,vs,de;
+	reg [23:0] d;
+	
+	hs <= direct_video ? dv_hs   : hdmi_hs_osd;
+	vs <= direct_video ? dv_vs   : hdmi_vs_osd;
+	de <= direct_video ? dv_de   : hdmi_de_osd;
+	d  <= direct_video ? dv_data : hdmi_data_osd;
+
+	hdmi_out_hs <= hs;
+	hdmi_out_vs <= vs;
+	hdmi_out_de <= de;
+	hdmi_out_d  <= d;
+end
+
+assign HDMI_TX_HS = hdmi_out_hs;
+assign HDMI_TX_VS = hdmi_out_vs;
+assign HDMI_TX_DE = hdmi_out_de;
+assign HDMI_TX_D  = hdmi_out_d;
 
 /////////////////////////  VGA output  //////////////////////////////////
 
@@ -985,7 +1038,7 @@ csync csync_vga(clk_vid, vga_hs_osd, vga_vs_osd, vga_cs_osd);
 	//assign VGA_G  = (VGA_EN | SW[3]) ? 6'bZZZZZZ : vga_o[15:10];
 	//assign VGA_B  = (VGA_EN | SW[3]) ? 6'bZZZZZZ : vga_o[7:2];
 	
-	//DE10-standard / DE1 SoC / Arrow SoCKit implementation for on-board VGA DAC route - assign values
+   //DE10-standard / DE1 SoC / Arrow SoCKit implementation for on-board VGA DAC route - assign values
 	
 	assign VGA_VS = (VGA_EN | SW[3]) ? 1'bZ      : csync_en ? 1'b1 : ~vs1;
 	assign VGA_HS = (VGA_EN | SW[3]) ? 1'bZ      : csync_en ? ~cs1 : ~hs1;
@@ -995,7 +1048,9 @@ csync csync_vga(clk_vid, vga_hs_osd, vga_vs_osd, vga_cs_osd);
 	
 	assign VGA_BLANK_N = VGA_HS && VGA_VS; //VGA DAC additional required pin
    assign VGA_SYNC_N = 0; 						//VGA DAC additional required pin
-   assign VGA_CLK = HDMI_TX_CLK; 			//has to define a clock to VGA DAC clock otherwise the picture is noisy
+   //assign VGA_CLK = HDMI_TX_CLK; 			//has to define a clock to VGA DAC clock otherwise the picture is noisy
+	
+	//assign VGA_CLK = clk_vid; 			//has to define a clock to VGA DAC clock otherwise the picture is noisy
 	
 `endif
 
@@ -1095,6 +1150,7 @@ alsa alsa
 );
 
 //// DE10-Standard / DE1-SoC / Arrow SoCKit audio codec i2c ////
+
 wire exchan;
 wire mix;
 assign exchan = 1'b0;

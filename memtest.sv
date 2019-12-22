@@ -180,8 +180,7 @@ pll pll
 	.*,
 	.refclk(CLK_50M),
 	.rst(pll_reset | RESET),
-	.outclk_0(clk_ram),
-	.outclk_1(SDRAM_CLK)
+	.outclk_0(clk_ram)
 );
 
 wire        mgmt_waitrequest;
@@ -206,36 +205,29 @@ reg pll_reset = 0;
 // Phases here are empirically adjusted based on 167MHz synthesized core 
 // so arn't reliable for fixed frequency cores.
 wire [31:0] cfg_param[44] =
-'{ //          M         K          C    Ph
-	/*167*/ 'h00808, 'hB33332DD, 'h20302, 29,
-	/*160*/ 'h00808, 'h00000001, 'h20302, 28,
-	/*150*/ 'h20807, 'h00000001, 'h20302, 27,
-	/*140*/ 'h00707, 'h00000001, 'h20302, 23,
-	/*130*/ 'h00505, 'h66666611, 'h00202, 26,
-	/*120*/ 'h00707, 'h66666611, 'h00303, 23,
-	/*110*/ 'h20706, 'h333332DD, 'h00303, 17,
-	/*100*/ 'h00404, 'h00000001, 'h00202, 14,
-	/* 90*/ 'h00707, 'h66666666, 'h00404, 16,
-	/* 80*/ 'h00707, 'h66666666, 'h20504, 8,
-	/* 70*/ 'h00707, 'h00000001, 'h00505, 0
+'{ //      M         K          C
+	'h167, 'h00808, 'hB33332DD, 'h20302,
+	'h160, 'h00808, 'h00000001, 'h20302,
+	'h150, 'h20807, 'h00000001, 'h20302,
+	'h140, 'h00707, 'h00000001, 'h20302,
+	'h130, 'h00505, 'h66666611, 'h00202,
+	'h120, 'h00707, 'h66666611, 'h00303,
+	'h110, 'h20706, 'h333332DD, 'h00303,
+	'h100, 'h00404, 'h00000001, 'h00202,
+	 'h90, 'h00707, 'h66666666, 'h00404,
+	 'h80, 'h00707, 'h66666666, 'h20504,
+	 'h70, 'h00707, 'h00000001, 'h00505
 };
 
-wire [11:0] freq[11] = '{12'h167, 12'h160, 12'h150, 12'h140, 12'h130, 12'h120, 12'h110, 12'h100, 12'h90, 12'h80, 12'h70};
 reg   [3:0] pos  = 0;
 reg  [15:0] mins = 0;
 reg  [15:0] secs = 0;
 reg         auto = 0;
 
-reg			ph_shift = 0;
-reg  [31:0] pre_phase;
-
 always @(posedge CLK_50M) begin
 	reg  [7:0] state = 0;
-	reg        old_wait;
-	reg [31:0] phase;
 	integer    min = 0, sec = 0;
 	reg        old_stb = 0;
-	reg        shift = 0;
 
 	mgmt_write <= 0;
 
@@ -248,20 +240,19 @@ always @(posedge CLK_50M) begin
 						mgmt_address   <= 0;
 						mgmt_writedata <= 0;
 						mgmt_write     <= 1;
-						if(!ph_shift)  pre_phase <= cfg_param[{pos, 2'd3}];
 					end
 
 				// M
 				1: begin
 						mgmt_address   <= 4;
-						mgmt_writedata <= cfg_param[{pos, 2'd0}];
+						mgmt_writedata <= cfg_param[{pos, 2'd1}];
 						mgmt_write     <= 1;
 					end
 
 				// K
 				2: begin
 						mgmt_address   <= 7;
-						mgmt_writedata <= cfg_param[{pos, 2'd1}];
+						mgmt_writedata <= cfg_param[{pos, 2'd2}];
 						mgmt_write     <= 1;
 					end
 
@@ -275,73 +266,35 @@ always @(posedge CLK_50M) begin
 				// C0
 				4: begin
 						mgmt_address   <= 5;
-						mgmt_writedata <= cfg_param[{pos, 2'd2}];
-						mgmt_write     <= 1;
-					end
-
-				// C1
-				5: begin
-						mgmt_address   <= 5;
-						mgmt_writedata <= cfg_param[{pos, 2'd2}] | 'h40000;
+						mgmt_writedata <= cfg_param[{pos, 2'd3}];
 						mgmt_write     <= 1;
 					end
 
 				// Charge pump
-				6: begin
+				5: begin
 						mgmt_address   <= 9;
 						mgmt_writedata <= 1;
 						mgmt_write     <= 1;
 					end
 
 				// Bandwidth
-				7: begin
+				6: begin
 						mgmt_address   <= 8;
 						mgmt_writedata <= 7;
 						mgmt_write     <= 1;
 					end
 
 				// Apply
-				8: begin
+				7: begin
 						mgmt_address   <= 2;
 						mgmt_writedata <= 0;
 						mgmt_write     <= 1;
 					end
 
-				9:  pll_reset <= 1;
-				10: pll_reset <= 0;
+				8: pll_reset <= 1;
+				9: pll_reset <= 0;
 
-				// Start
-				11: begin
-						mgmt_address   <= 0;
-						mgmt_writedata <= 0;
-						mgmt_write     <= 1;
-						
-						if(pre_phase > cfg_param[3]) phase <= pre_phase - cfg_param[3];
-						else
-						if(pre_phase < cfg_param[3]) phase <= (cfg_param[3] - pre_phase) | 'h200000;
-						else
-						begin
-							// no change. finish.
-							mgmt_write  <= 0;
-							recfg <= 0;
-						end
-					end
-
-				// Phase
-				12: begin
-						mgmt_address   <= 6;
-						mgmt_writedata <= phase | 'h10000;
-						mgmt_write     <= 1;
-					end
-
-				// Apply
-				13: begin
-						mgmt_address   <= 2;
-						mgmt_writedata <= 0;
-						mgmt_write     <= 1;
-					end
-
-				14: recfg <= 0;
+				10: recfg <= 0;
 			endcase
 		end
 	end
@@ -383,46 +336,33 @@ always @(posedge CLK_50M) begin
 				recfg <= 1;
 				pos <= pos - 1'd1;
 				auto <= 0;
-				ph_shift <= 0;
 			end
 			if(ps2_key[7:0] == 'h72 && pos < 10) begin
 				recfg <= 1;
 				pos <= pos + 1'd1;
 				auto <= 0;
-				ph_shift <= 0;
 			end
 			if(ps2_key[7:0] == 'h5a) begin
 				recfg <= 1;
 				auto <= 0;
-				ph_shift <= shift;
 			end
 			if(ps2_key[7:0] == 'h1c) begin
 				recfg <= 1;
 				pos <= 0;
 				auto <= 1;
-				ph_shift <= 0;
-			end
-			if(ps2_key[7:0] == 'h74 && shift && pre_phase < 100) begin
-				recfg <= 1;
-				pre_phase <= pre_phase + 1'd1;
-				auto <= 0;
-				ph_shift <= 1;
-			end
-			if(ps2_key[7:0] == 'h6B && shift && pre_phase > 0) begin
-				recfg <= 1;
-				pre_phase <= pre_phase - 1'd1;
-				auto <= 0;
-				ph_shift <= 1;
 			end
 		end
-
-		if(ps2_key[7:0] == 'h12) shift <= ps2_key[9];
 	end
 
-	if(auto && failcount && !recfg && pos < 10) begin
+	if(auto && (failcount && passcount) && !recfg && pos < 10) begin
 		recfg <= 1;
 		pos <= pos + 1'd1;
-		ph_shift <= 0;
+	end
+	
+	if(status[0] | buttons[1]) begin
+		recfg <= 1;
+		pos <= 0;
+		auto <= 1;
 	end
 end
 
@@ -437,9 +377,9 @@ always @(posedge clk_ram) begin
 	if(timeout) timeout <= timeout - 1;
 	reset <= |timeout;
 
-	if((buttons[1] || recfg || ~locked) && (timeout < 1000000)) timeout <= 1000000;
+	if((recfg || ~locked) && (timeout < 1000000)) timeout <= 1000000;
 
-	if(RESET || status[0]) timeout <= 300000000;
+	if(RESET) timeout <= 100000000;
 end
 
 wire [31:0] passcount, failcount;
@@ -450,6 +390,7 @@ tester my_memtst
 	.sz(sdram_sz),
 	.passcount(passcount),
 	.failcount(failcount),
+	.DRAM_CLK(SDRAM_CLK),
 	.DRAM_DQ(SDRAM_DQ),
 	.DRAM_ADDR(SDRAM_A),
 	.DRAM_LDQM(SDRAM_DQML),
@@ -484,9 +425,9 @@ vgaout showrez
 	.rez1({sdram_sz, passcount[27:0]}),
 	.rez2(failcount),
 	.bg(6'b000001),
-	.freq(16'hF000 | freq[pos]),
-	.elapsed(ph_shift ? pre_phase[15:0] : mins),
-	.mark(ph_shift ? 8'hF0 : auto ? 8'h80 >> secs[3:0] : 8'd0),
+	.freq(16'hF000 | cfg_param[{pos, 2'd0}][11:0]),
+	.elapsed(mins),
+	.mark(8'h80 >> {~auto, secs[2:0]}),
 	.hs(hs),
 	.vs(vs),
 	.de(VGA_DE),
